@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
             initBird(&birds[i]);
         }
     }
-    MPI_Bcast(birds, NUMBER * 7, MPI_DOUBLE, 0, MPI_COMM_WORLD); /**< Broadcast all bird data to all processes. */
+    MPI_Bcast(birds, NUMBER * BIRD_DOUBLES, MPI_DOUBLE, 0, MPI_COMM_WORLD); /**< Broadcast all bird data to all processes. */
 
     memcpy(proc_birds, &birds[startnum], sizeof(struct Bird) * num_pp); /**< Copy the birds for this process. */
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
             updateBirdPos(&proc_birds[j]);
         }
 
-        MPI_Allgather(proc_birds, num_pp * 7, MPI_DOUBLE, birds, num_pp * 7, MPI_DOUBLE, MPI_COMM_WORLD); /**< Gather all birds' data. */
+        MPI_Allgather(proc_birds, num_pp * BIRD_DOUBLES, MPI_DOUBLE, birds, num_pp * BIRD_DOUBLES, MPI_DOUBLE, MPI_COMM_WORLD); /**< Gather all birds' data. */
 
         #pragma omp parallel private(j)
         {
@@ -77,12 +77,12 @@ int main(int argc, char *argv[])
             }
         }
         
-        MPI_Gather(proc_birds, num_pp * 7, MPI_DOUBLE, birds, num_pp * 7, MPI_DOUBLE, 0, MPI_COMM_WORLD); /**< Gather all birds' data to process 0. */
+        MPI_Gather(proc_birds, num_pp * BIRD_DOUBLES, MPI_DOUBLE, birds, num_pp * BIRD_DOUBLES, MPI_DOUBLE, 0, MPI_COMM_WORLD); /**< Gather all birds' data to process 0. */
         if (rank == 0) {
             #pragma omp parallel for schedule(static) private(b)
             for (j = 0; j < NUMBER; j++) { /**< Print positions and velocities of all birds. */
                 b = &birds[j];
-                printf("[%f,%f,%f,%f],", b->x, b->y, b->vx, b->vy);
+                printf("[%f,%f,%f,%f,%f,%f],", b->x, b->y, b->z, b->vx, b->vy, b->vz);
             }
             printf("\n");
         }

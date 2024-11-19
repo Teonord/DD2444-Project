@@ -26,6 +26,7 @@
     #define TIMESTEPS 200   // Amount of Timesteps
     #define NUMBER 500      // Amount of Birds
     #define SEED 621        // Seed for Randomness
+    #define BIRD_DOUBLES 11 // Amount of doubles in Bird struct
 
     #define V0 1.0          // Velocity
     #define RFA 0.3         // Random Fluctuation in Angle (Radians)
@@ -51,8 +52,9 @@ struct Bird
     double vx; /**< X component of velocity of the bird. */
     double vy; /**< Y component of velocity of the bird. */
     double vz; /**< Y component of velocity of the bird. */
-    double sx; /**< Sum of cosine components of neighboring bird angles. */
-    double sy; /**< Sum of sine components of neighboring bird angles. */
+    double sint; /**< Sum of sine components of neighboring bird angles for theta. */
+    double costcose; /**< Sum of cos components of neighboring bird angles for theta and eta. */
+    double costsine; /**< Sum of cos components of neighboring bird angles for theta and sin components for eta. */
 };
 
 /** @brief Generates and returns a random double-precision float in range [0.0, 1.0]
@@ -143,9 +145,9 @@ void updateBirdPos(struct Bird *b) {
 /**
  * @brief Calculates the effects of neighboring birds on the current bird's angle.
  *
- * This function calculates the effects of neighboring birds within a certain radius (R)                                                         << Do this
- * on the angle of the current bird. It updates the sum of sines (sy) and cosines (sx)
- * of the angles of neighboring birds.
+ * This function calculates the effects of neighboring birds within a certain sphere radius (R)
+ * on the angle of the current bird. It updates the sum components presented in
+ * the paper "Consensus of the 3-Dimensional Vicsek Model" by Liu Zhixin
  *
  * @param b Pointer to the bird struct to update its angle effects.
  * @param birds Array of all birds in the simulation.
@@ -155,10 +157,11 @@ void calculateAngleEffects(struct Bird *b, struct Bird *birds, double R) {
     struct Bird *nb; /**< Pointer to a neighboring bird. */
     for (int k = 0; k < NUMBER; k++) {
         nb = &birds[k];
-        if (pow(nb->x - b->x, 2) + pow(nb->y - b->y, 2) < R) /**< Check if bird is within squared radius R. */
+        if (pow(nb->x - b->x, 2) + pow(nb->y - b->y, 2) + pow(nb->z - b->z, 2) < R) /**< Check if bird is within squared spherical radius R. */
         {
-            b->sx += cos(nb->theta); /**< Update sum of cosines. */
-            b->sy += sin(nb->theta); /**< Update sum of sines. */
+            b->sint += sin(nb->theta); /**< Update sum of sin theta. */
+            b->costcose += cos(nb->theta) * cos(nb->eta); /**< Update sum of cos theta and eta. */
+            b->costsine += cos(nb->theta) * sin(nb->eta); /**< Update sum of cos theta and sin eta. */
         }
     }
 }
@@ -166,17 +169,20 @@ void calculateAngleEffects(struct Bird *b, struct Bird *birds, double R) {
 /**
  * @brief Updates the angle of a bird based on the effects of neighboring birds.
  *
- * This function updates the angle of a bird struct based on the sum of sines (sy)
- * and cosines (sx) of the angles of neighboring birds, with added random perturbation.
+ * This function updates the angle of a bird struct based on components presented in
+ * the paper "Consensus of the 3-Dimensional Vicsek Model" by Liu Zhixin
  *
  * @param b Pointer to the bird struct to update its angle.
  */
 void updateBirdAngle(struct Bird *b) {
-    b->theta = atan2(b->sy, b->sx) + RFA * (randd() - 0.5); /**< Update angle with noise. */
+    double divider = sqrt(pow(b->costcose, 2) + pow(b->costsine, 2));
+    b->theta = atan(b->sint / divider) + RFA * (randd() - 0.5); /**< Update angle with noise. */
 
-    b->sx = 0; /**< Reset sum of cosines. */
-    b->sy = 0; /**< Reset sum of sines. */
+    b->sint = 0; /**< Reset sum of sin theta. */
+    b->costcose = 0; /**< Reset sum of cos theta and eta. */
+    b->costsine = 0; /**< Reset sum of cos theta and sin eta. */
 
-    b->vx = V0 * cos(b->theta); /**< Update x component of velocity based on new angle. */
-    b->vy = V0 * sin(b->theta); /**< Update y component of velocity based on new angle. */
+    b->vx = V0 * cos(b->theta) * cos(b->eta); /**< Update x component of velocity based on new angle. */
+    b->vy = V0 * cos(b->theta) * sin(b->eta); /**< Update y component of velocity based on new angle. */
+    b->vz = V0 * sin(b->theta); /**< Update z component of velocity based on new angle. */
 }
