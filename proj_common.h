@@ -40,7 +40,7 @@
  * @brief Struct to represent a bird.
  *
  * This struct represents a bird in the simulation, containing its position,
- * angle, velocity, and sum of sine and cosine components for angle calculation.
+ * angles, velocity, and sum of components for angle calculation.
  */
 struct Bird
 {
