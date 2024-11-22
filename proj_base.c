@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
         MPI_Gather(proc_birds, num_pp * BIRD_DOUBLES, MPI_DOUBLE, birds, num_pp * BIRD_DOUBLES, MPI_DOUBLE, 0, MPI_COMM_WORLD); /**< Gather all birds' data to process 0. */
         if (rank == 0) {
             #pragma omp parallel for schedule(static) private(b)
-            for (j = 0; j < NUMBER; j++) { /**< Print positions and velocities of all birds. */
+            for (j = 0; j < NUMBER; j++) { /**< Print positions and rotations of all birds. */
                 b = &birds[j];
                 printf("[%f,%f,%f,%f,%f,%f],", b->x, b->y, b->z, b->vx, b->vy, b->vz);
             }

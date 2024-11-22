@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <time.h>
 
+#define RANDOM 1        // If seed should be randomized
 #define VERIF 0         // If Verification is to be run
 
 #define PI 3.14159265358979323846
@@ -23,17 +25,22 @@
     const double initheta[25] = {0,1,2,3,4,5,6,0,1,2,3,4,5,6,0,1,2,3,4,5,6,0,1,2,3}; /**< Initial angles for birds during verification. */
 
 #else
-    #define TIMESTEPS 200   // Amount of Timesteps
+    #define TIMESTEPS 500   // Amount of Timesteps
     #define NUMBER 500      // Amount of Birds
-    #define SEED 621        // Seed for Randomness
     #define BIRD_DOUBLES 11 // Amount of doubles in Bird struct
 
     #define V0 1.0          // Velocity
-    #define RFA 0.3         // Random Fluctuation in Angle (Radians)
-    #define L 10.0          // Size of Box
+    #define RFA 1.0         // Random Fluctuation in Angle (Radians)
+    #define L 5.0          // Size of Box
     #define R_INIT 1.0      // Interaction Radius
-    #define DT 0.2          // Time Step 
+    #define DT 0.05          // Time Step 
 
+#endif
+
+#if RANDOM
+    #define SEED time(NULL)
+#else
+    #define SEED 621        // Seed for Randomness
 #endif
 
 /**
@@ -116,8 +123,8 @@ void initBird(struct Bird *b) {
         b->y = randd() * L; /**< Random initial y position within a range. */
         b->z = randd() * L; /**< Random initial z position within a range. */
 
-        b->theta = 2 * PI * randd(); /**< Random initial first angle within 0 to 2*PI. */
-        b->eta = 2 * PI * randd(); /**< Random initial second angle within 0 to 2*PI. */
+        b->theta = PI * (randd() - 0.5); /**< Random initial first angle within -PI/2 to PI/2. */
+        b->eta = 2 * PI * (randd() - 0.5); /**< Random initial second angle within -PI to PI. */
     #endif
     b->vx = V0 * cos(b->theta) * cos(b->eta); /**< Initial velocity along x direction. */
     b->vy = V0 * cos(b->theta) * sin(b->eta); /**< Initial velocity along y direction. */
@@ -176,7 +183,8 @@ void calculateAngleEffects(struct Bird *b, struct Bird *birds, double R) {
  */
 void updateBirdAngle(struct Bird *b) {
     double divider = sqrt(pow(b->costcose, 2) + pow(b->costsine, 2));
-    b->theta = atan(b->sint / divider) + RFA * (randd() - 0.5); /**< Update angle with noise. */
+    b->theta = atan(b->sint / divider) + RFA * (randd() - 0.5); /**< Update theta with noise. */
+    b->eta = atan(b->costsine / b->costcose) + RFA * (randd() - 0.5); /**< Update eta with noise. */ 
 
     b->sint = 0; /**< Reset sum of sin theta. */
     b->costcose = 0; /**< Reset sum of cos theta and eta. */
