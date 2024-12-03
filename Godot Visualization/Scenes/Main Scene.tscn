@@ -5,6 +5,7 @@
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_5a86v")
+pure_doubles = true
 
 [node name="Marker3D" type="Marker3D" parent="."]
 
