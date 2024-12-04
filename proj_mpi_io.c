@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 
     struct Bird *birds = calloc(NUMBER, sizeof(struct Bird)); /**< Allocate memory for all birds. */
     struct Bird *proc_birds = calloc(num_pp, sizeof(struct Bird)); /**< Allocate memory for birds of this process. */
+    double *print_values = malloc(num_pp * PRINT_DOUBLES * sizeof(double));
 
     double startTime = omp_get_wtime(); /**< Record start time of simulation. */
 
@@ -78,12 +79,13 @@ int main(int argc, char *argv[])
             #pragma omp for schedule(static)
             for (j = 0; j < num_pp; j++) { /**< Update angles of all birds for this process in parallel. */
                 updateBirdAngle(&proc_birds[j]);
+                memcpy(&print_values[j * PRINT_DOUBLES], &proc_birds[j], PRINT_DOUBLES * sizeof(double));
             }
         }
 
-        MPI_Offset offset = (startnum + NUMBER * i) * sizeof(struct Bird);
+        MPI_Offset offset = (startnum + NUMBER * i) * PRINT_DOUBLES * sizeof(double);
         MPI_File_set_view(fh, offset, MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL);
-        MPI_File_write_all(fh, proc_birds, num_pp * BIRD_DOUBLES, MPI_DOUBLE, MPI_STATUS_IGNORE);
+        MPI_File_write_all(fh, print_values, num_pp * PRINT_DOUBLES, MPI_DOUBLE, MPI_STATUS_IGNORE);
         
     }
     if (rank == 0) {

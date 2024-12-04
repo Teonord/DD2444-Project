@@ -4,14 +4,15 @@
 #include <time.h>
 #include <mpi.h>
 
-#define RANDOM 1        // If seed should be randomized
+#define RANDOM 0        // If seed should be randomized
 #define FILENAME "output.dat" // Shared Filename if used
 
 #define PI 3.14159265358979323846
 
-#define TIMESTEPS 20   // Amount of Timesteps
+#define TIMESTEPS 250   // Amount of Timesteps
 #define NUMBER 500      // Amount of Birds
 #define BIRD_DOUBLES 11 // Amount of doubles in Bird struct
+#define PRINT_DOUBLES 6 // Amount of doubles to print (first x doubles of Bird)
 
 #define V0 1.0          // Velocity
 #define RFA 1.0         // Random Fluctuation in Angle (Radians)
