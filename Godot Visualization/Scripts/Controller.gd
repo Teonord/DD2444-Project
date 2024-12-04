@@ -1,6 +1,7 @@
 extends Node3D
 
-@export var pure_doubles : bool
+@export var pure_doubles : bool = true
+@export var skip_other : bool = false
 
 var particle_scene = preload("res://Scenes/Bird.tscn")
 @onready var json = JSON.new()
@@ -22,14 +23,16 @@ func _ready():
 			particle.position = pos
 			particle.look_at(pos + Vector3(doubles.get_double(), doubles.get_double(), doubles.get_double()))
 			particles.append(particle)
-			doubles.seek(doubles.get_position() + 40)
+			if skip_other:
+				doubles.seek(doubles.get_position() + 40)
 		
 		for i in range(settings[1] - 1):
 			for j in range(settings[0]):
 				var pos = Vector3(doubles.get_double(), doubles.get_double(), doubles.get_double())
 				particles[j].position = pos
 				particles[j].look_at(pos + Vector3(doubles.get_double(), doubles.get_double(), doubles.get_double()))
-				doubles.seek(doubles.get_position() + 40)
+				if skip_other:
+					doubles.seek(doubles.get_position() + 40)
 			await get_tree().create_timer(settings[3]).timeout
 		
 	else:
