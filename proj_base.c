@@ -1,7 +1,6 @@
 #include "proj_common.h"
 #include <stdio.h>
 #include <omp.h>
-#include <mpi.h>
 #include <string.h>
 
 /**
