@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=3 uid="uid://dmbxd3cwwm334"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_ojix7"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yvlfy"]
+albedo_color = Color(1, 0, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kxqh5"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a4hqj"]
+albedo_color = Color(1, 0, 1, 1)
+
+[sub_resource type="PrismMesh" id="PrismMesh_svi8i"]
+
+[node name="Bird" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
+mesh = SubResource("SphereMesh_ojix7")
+surface_material_override/0 = SubResource("StandardMaterial3D_yvlfy")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.025, 0, 0, 0, 0.025, 0, 0, 0, 0.12, 0, 0, -0.06)
+mesh = SubResource("BoxMesh_kxqh5")
+surface_material_override/0 = SubResource("StandardMaterial3D_a4hqj")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.05, 0, 0, 0, -2.18557e-09, 0.05, 0, -0.05, -2.18557e-09, 0, 0, -0.14)
+mesh = SubResource("PrismMesh_svi8i")
+surface_material_override/0 = SubResource("StandardMaterial3D_a4hqj")

@@ -2,19 +2,21 @@ extends Node3D
 
 @export var pure_doubles : bool = true
 @export var skip_other : bool = false
+@export var res_name : String = "res"
+@export var output_name : String = "output.dat"
+@export var particle_scene : PackedScene
 
-var particle_scene = preload("res://Scenes/Bird.tscn")
 @onready var json = JSON.new()
 
 func _ready():
-	var file = FileAccess.open("res://res", FileAccess.READ)
+	var file = FileAccess.open("res://%s" % [res_name], FileAccess.READ)
 	var settings = []
 	for item in file.get_line().split(" "):
 		settings.append(float(item))
 	print(settings)
 	
 	if pure_doubles:
-		var doubles = FileAccess.open("res://output.dat", FileAccess.READ)
+		var doubles = FileAccess.open("res://%s" % [output_name], FileAccess.READ)
 		var particles = []
 		for i in range(settings[0]):
 			var particle = particle_scene.instantiate()

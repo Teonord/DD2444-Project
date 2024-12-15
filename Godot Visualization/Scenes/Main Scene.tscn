@@ -1,10 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://cbd2tv4mwx8h8"]
+[gd_scene load_steps=5 format=3 uid="uid://cbd2tv4mwx8h8"]
 
 [ext_resource type="Script" path="res://Scripts/Controller.gd" id="1_5a86v"]
 [ext_resource type="Script" path="res://Scripts/Camera.gd" id="2_6akk7"]
+[ext_resource type="PackedScene" uid="uid://bstvp24iryw6e" path="res://Scenes/Bird.tscn" id="2_rsdlt"]
+[ext_resource type="PackedScene" uid="uid://dmbxd3cwwm334" path="res://Scenes/BirdRed.tscn" id="3_ctf02"]
 
 [node name="Node3D" type="Node3D"]
+
+[node name="Controller1" type="Node3D" parent="."]
 script = ExtResource("1_5a86v")
+res_name = "resa"
+particle_scene = ExtResource("2_rsdlt")
+
+[node name="Controller2" type="Node3D" parent="."]
+script = ExtResource("1_5a86v")
+res_name = "resb"
+output_name = "outputb.dat"
+particle_scene = ExtResource("3_ctf02")
 
 [node name="Marker3D" type="Marker3D" parent="."]
 
