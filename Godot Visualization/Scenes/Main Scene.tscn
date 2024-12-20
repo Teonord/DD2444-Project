@@ -10,9 +10,11 @@
 [node name="Controller1" type="Node3D" parent="."]
 script = ExtResource("1_5a86v")
 res_name = "resa"
+output_name = "outputa.dat"
 particle_scene = ExtResource("2_rsdlt")
 
 [node name="Controller2" type="Node3D" parent="."]
+visible = false
 script = ExtResource("1_5a86v")
 res_name = "resb"
 output_name = "outputb.dat"
