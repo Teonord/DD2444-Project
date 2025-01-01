@@ -1,4 +1,4 @@
-# DD2444-Project: A Distributed Computing Implementation of a 3-dimensional Extension of the Vicsek Model for Flocking Birds
+# DD2444-Project: A Distributed Computing Implementation of a 3-dimensional Extension of the Vicsek Model
 Project (graded, 7.5 credits) for the Project Course in Scientific Computing (DD2444).
 More information about all the steps can be found in the project report.
 
