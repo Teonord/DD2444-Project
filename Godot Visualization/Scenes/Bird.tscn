@@ -7,6 +7,7 @@
 [sub_resource type="PrismMesh" id="PrismMesh_svi8i"]
 
 [node name="Bird" type="Node3D"]
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 0, 0, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)

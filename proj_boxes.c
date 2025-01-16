@@ -15,7 +15,11 @@ struct Box
 };
 
 /**
- * @brief function to compare two boxes
+ * @brief function to compare two birds based on box number 
+ * 
+ * @param a Birdbox 1 to compare
+ * @param b Birdbox 2 to compare
+ * @return Difference in box number between the two bird boxes. 
  */
 int compare(const void *a, const void *b) {
     struct Box *pa = (struct Box *)a;
@@ -67,11 +71,11 @@ int main(int argc, char *argv[])
 
     double R = pow(R_INIT, 2); /**< Interaction radius squared, used in Pythagorean theorem. */
     
-    int row = L / R_INIT;
-    double box_size = (double)L / (double)row;
-    int side = row * row;
-    int amount_boxes = side * row; 
-    int box_pos[amount_boxes];
+    int row = L / R_INIT; /**< Amount of boxes are in one row */
+    double box_size = (double)L / (double)row; /** Side size of each box */
+    int side = row * row; /**< Amount of boxes in 2D */
+    int amount_boxes = side * row; /**< Total amount of boxes in 3D */
+    int box_pos[amount_boxes]; /**< Amount of particles in each box */
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided); /**< Initialize MPI with single thread support. */
     MPI_Comm_size(MPI_COMM_WORLD, &size); /**< Get the total number of processes. */
@@ -96,7 +100,7 @@ int main(int argc, char *argv[])
     struct Bird *birds = calloc(NUMBER, sizeof(struct Bird)); /**< Allocate memory for all birds. */
     struct Bird **new_birds = calloc(NUMBER, __SIZEOF_POINTER__); /**< Allocate memory for all birds when sorted. */
     struct Bird *proc_birds = calloc(num_pp, sizeof(struct Bird)); /**< Allocate memory for birds of this process. */
-    double *print_values = malloc(num_pp * PRINT_DOUBLES * sizeof(double));
+    double *print_values = malloc(num_pp * PRINT_DOUBLES * sizeof(double)); /**< Allocate memory for values to save from this process. */
 
     struct Box *boxpairs = calloc(NUMBER, sizeof(struct Box));
 
@@ -128,21 +132,21 @@ int main(int argc, char *argv[])
             int boxnum = floor(b->x / box_size) + floor(b->y / box_size) * row + floor(b->z / box_size) * side;
             boxpairs[j].boxnum = boxnum;
             boxpairs[j].bird = b;
-            if (boxnum + 1 != amount_boxes) {
+            if (boxnum + 1 != amount_boxes) { /**< Increment amounts of particles in each box. If pos is (L, L, L) it does not matter. */
                 box_pos[boxnum + 1] += 1;
             }
         }
 
-        for (int j = 0; j < amount_boxes - 1; j++) {
+        for (int j = 0; j < amount_boxes - 1; j++) { /**< Makes sure each index shows the amount of particles before this box starts. */
             box_pos[j + 1] += box_pos[j];
         }
 
-        qsort(boxpairs, NUMBER, sizeof(struct Box), compare);
+        qsort(boxpairs, NUMBER, sizeof(struct Box), compare); /**< Sort all birds to be in the order of box numbers */
 
         #pragma omp parallel private(j)
         {
             #pragma omp for schedule(static)
-            for (j = 0; j < NUMBER; j++){ 
+            for (j = 0; j < NUMBER; j++){ /**< Get list of birds in order of which box they are in */
                 new_birds[j] = boxpairs[j].bird;
             }
 
@@ -161,9 +165,9 @@ int main(int argc, char *argv[])
                 for (x = -1; x <= 1; x++) {
                     for (y = -1; y <= 1; y++) {
                         for (z = -1; z <= 1; z++) {
-                            int nb_box = modd(cx + x, row) + modd(cy + y, row) * row + modd(cz + z, row) * side;
-                            if (nb_box + 1 != amount_boxes) boxCalculateAngleEffects(b, new_birds, R, box_pos[nb_box], box_pos[nb_box + 1]);
-                            else boxCalculateAngleEffects(b, new_birds, R, box_pos[nb_box], NUMBER);
+                            int nb_box = modd(cx + x, row) + modd(cy + y, row) * row + modd(cz + z, row) * side; /**< Calculate box index */
+                            if (nb_box + 1 != amount_boxes) boxCalculateAngleEffects(b, new_birds, R, box_pos[nb_box], box_pos[nb_box + 1]); /**< Calculates distance to all birds in box, unless it is the last box */
+                            else boxCalculateAngleEffects(b, new_birds, R, box_pos[nb_box], NUMBER); /**< If last box, just check rest of particles. */
                         }
                     }
                 }
@@ -174,13 +178,13 @@ int main(int argc, char *argv[])
             #pragma omp for schedule(static)
             for (j = 0; j < num_pp; j++) { /**< Update angles of all birds for this process in parallel. */
                 updateBirdAngle(&proc_birds[j]);
-                memcpy(&print_values[j * PRINT_DOUBLES], &proc_birds[j], PRINT_DOUBLES * sizeof(double));
+                memcpy(&print_values[j * PRINT_DOUBLES], &proc_birds[j], PRINT_DOUBLES * sizeof(double)); /**< Copy the position and velocity doubles to a separate array for writing */
             }
         }
 
-        MPI_Offset offset = (startnum + NUMBER * i) * PRINT_DOUBLES * sizeof(double);
-        MPI_File_set_view(fh, offset, MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL);
-        MPI_File_write_all(fh, print_values, num_pp * PRINT_DOUBLES, MPI_DOUBLE, MPI_STATUS_IGNORE);
+        MPI_Offset offset = (startnum + NUMBER * i) * PRINT_DOUBLES * sizeof(double); /**< Calculate where in file to write based on rank and timestep*/
+        MPI_File_set_view(fh, offset, MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL); /**< Set Offset */
+        MPI_File_write_all(fh, print_values, num_pp * PRINT_DOUBLES, MPI_DOUBLE, MPI_STATUS_IGNORE);  /**< Write bytes to file */
         
     }
     if (rank == 0) {

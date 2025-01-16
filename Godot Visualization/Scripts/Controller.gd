@@ -5,6 +5,8 @@ extends Node3D
 @export var res_name : String = "res"
 @export var output_name : String = "output.dat"
 @export var particle_scene : PackedScene
+@export var skip_timesteps : int = 0
+@export var heatmap_range : float = 1
 
 @onready var json = JSON.new()
 
@@ -17,25 +19,53 @@ func _ready():
 	
 	if pure_doubles:
 		var doubles = FileAccess.open("res://%s" % [output_name], FileAccess.READ)
-		var particles = []
+		var particles : Array[Node3D] = []
 		for i in range(settings[0]):
 			var particle = particle_scene.instantiate()
 			add_child(particle)
 			var pos = Vector3(doubles.get_double(), doubles.get_double(), doubles.get_double())
+			if i == 0: 
+				print(pos)
 			particle.position = pos
 			particle.look_at(pos + Vector3(doubles.get_double(), doubles.get_double(), doubles.get_double()))
 			particles.append(particle)
 			if skip_other:
 				doubles.seek(doubles.get_position() + 40)
 		
-		for i in range(settings[1] - 1):
+		doubles.seek(doubles.get_position() + (8 * skip_timesteps * settings[0]))
+		
+		for i in range(settings[1] - 1 - skip_timesteps):
 			for j in range(settings[0]):
 				var pos = Vector3(doubles.get_double(), doubles.get_double(), doubles.get_double())
+				if j == 0: 
+					print(pos)
 				particles[j].position = pos
 				particles[j].look_at(pos + Vector3(doubles.get_double(), doubles.get_double(), doubles.get_double()))
 				if skip_other:
 					doubles.seek(doubles.get_position() + 40)
 			await get_tree().create_timer(settings[3]).timeout
+		
+		var heatmap : Array[float] = []
+		heatmap.resize(settings[0])
+		
+		for i in range(settings[0]):
+			for j in range(i + 1, settings[0]):
+				if particles[i].position.distance_to(particles[j].position) > heatmap_range:
+					heatmap[i] += 1
+					heatmap[j] += 1
+					
+		var m_heatmap = max(heatmap) / 100
+		
+		var mats : Array[StandardMaterial3D] = []
+		for i in range(101):
+			var mat = StandardMaterial3D.new()
+			mat.albedo_color = Color(i * 0.01, 0, 0)
+			mats.append(mat)
+		
+		for i in range(settings[0]):
+			var choice = floor(heatmap[i] / m_heatmap)
+			for child : MeshInstance3D in particles[i].get_children():
+				child.mesh.surface_set_material(0, mats[choice])
 		
 	else:
 		var line = file.get_line()
