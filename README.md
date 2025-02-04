@@ -2,6 +2,14 @@
 Project (graded, 7.5 credits) for the Project Course in Scientific Computing (DD2444).
 More information about all the steps can be found in the project report.
 
+## Images
+
+A flock of many aligned particles.
+![A flock of many aligned particles](https://i.imgur.com/JtO8Dpb.png)
+
+A sparser area of particles with higher concentrations surrounding. Particles that are further away from each other have a higher chance of going in a different direction. 
+![A sparser area of particles with higher concentrations surrounding](https://i.imgur.com/0sWmwmU.png)
+
 ## Files
 - **proj_common.h**
     - Contains all functions and constants (parameters) neccessary to all of the different implementations of the Vicsek model.
